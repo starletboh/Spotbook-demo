@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Logs — Spotbook</title>
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/logs.css">
+</head>
+<body>
+
+<nav class="sidebar"></nav>
+
+<main class="log-page-wrapper">
+    <div class="log-header">
+        <h1>Audit Logs</h1>
+    </div>
+
+    <div class="controls">
+        <input type="text" id="logSearch" placeholder="Search logs…" oninput="filterLogs()">
+        <select id="actionFilter" onchange="filterLogs()">
+            <option value="">All Actions</option>
+            <option value="reservation.create">Reservation Created</option>
+            <option value="reservation.checkin">Check-In</option>
+            <option value="reservation.cancel">Reservation Cancelled</option>
+            <option value="user.create">User Created</option>
+            <option value="settings.update">Settings Updated</option>
+            <option value="floorplan.create">Layout Changed</option>
+            <option value="role.edit">Role Edited</option>
+        </select>
+        <input type="date" id="dateFilter" onchange="filterLogs()">
+    </div>
+
+    <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+        <div class="quick-filters">
+            <button onclick="clearFilters()">Clear Filters</button>
+        </div>
+        <div class="action-buttons">
+            <button class="refresh-btn" onclick="renderLogs(DEMO.logs);showPopup('Refreshed','success')">Refresh</button>
+            <button class="purge-btn" onclick="confirmPurge()">Purge Logs</button>
+        </div>
+    </div>
+
+    <div class="log-table-wrapper">
+        <table id="log-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody id="log-tbody"></tbody>
+        </table>
+    </div>
+</main>
+
+<!-- Log detail popup -->
+<div class="popupp" id="log-detail-popup" onclick="closeLogDetail(event)">
+    <div class="popupp-content">
+        <div id="log-detail-content"></div>
+        <button onclick="document.getElementById('log-detail-popup').style.display='none';">Close</button>
+    </div>
+</div>
+
+<div id="popup" class="popup"></div>
+
+<script src="assets/js/mock-data.js"></script>
+<script src="assets/js/core.js"></script>
+<script src="assets/js/navigation.js"></script>
+<script>
+const ACTION_COLORS = {
+    'reservation.create':  'RESERVATION_CREATE',
+    'reservation.checkin': 'RESERVATION_CHECK_IN',
+    'reservation.cancel':  'RESERVATION_CANCEL',
+    'user.create':         'LOGIN',
+    'settings.update':     'LOGIN',
+    'floorplan.create':    'RESERVATION_CREATE',
+    'role.edit':           'LOGIN',
+};
+
+function actionLabel(action) {
+    const map = {
+        'reservation.create':  'Reservation Created',
+        'reservation.checkin': 'Check-In',
+        'reservation.cancel':  'Reservation Cancelled',
+        'user.create':         'User Created',
+        'settings.update':     'Settings Updated',
+        'floorplan.create':    'Layout Changed',
+        'role.edit':           'Role Edited',
+    };
+    return map[action] || action;
+}
+
+function renderLogs(logs) {
+    const tbody = document.getElementById('log-tbody');
+    if (!logs.length) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;opacity:0.4;padding:28px;">No logs found.</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = logs.map(log => {
+        const d  = new Date(log.timestamp);
+        const ts = d.toLocaleDateString('en') + ' ' + d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});
+        const cls = ACTION_COLORS[log.action] || '';
+        return `
+        <tr onclick="showLogDetail(${log.id})" style="cursor:pointer;">
+            <td data-label="Timestamp"><span class="log-time">${ts}</span></td>
+            <td data-label="User"><span class="log-user">@${log.user}</span></td>
+            <td data-label="Action"><span class="type-pill ${cls}">${actionLabel(log.action)}</span></td>
+            <td data-label="Details"><span class="details-summary">${log.detail}</span></td>
+        </tr>`;
+    }).join('');
+}
+
+function filterLogs() {
+    const q      = (document.getElementById('logSearch')?.value || '').toLowerCase();
+    const action = document.getElementById('actionFilter')?.value || '';
+    const date   = document.getElementById('dateFilter')?.value || '';
+
+    const filtered = DEMO.logs.filter(log => {
+        const matchQ = !q || log.user.includes(q) || log.detail.toLowerCase().includes(q) || log.action.includes(q);
+        const matchA = !action || log.action === action;
+        const matchD = !date   || log.timestamp.startsWith(date);
+        return matchQ && matchA && matchD;
+    });
+    renderLogs(filtered);
+}
+
+function clearFilters() {
+    document.getElementById('logSearch').value  = '';
+    document.getElementById('actionFilter').value = '';
+    document.getElementById('dateFilter').value  = '';
+    renderLogs(DEMO.logs);
+}
+
+function showLogDetail(id) {
+    const log = DEMO.logs.find(l => l.id === id);
+    if (!log) return;
+    const d   = new Date(log.timestamp);
+    const cls = ACTION_COLORS[log.action] || '';
+    document.getElementById('log-detail-content').innerHTML = `
+        <div class="popup-header">
+            <span class="type-pill ${cls}">${actionLabel(log.action)}</span>
+            <span class="popup-time">${d.toLocaleString('en')}</span>
+        </div>
+        <div class="popup-meta">by <strong style="color:#a78bff;">@${log.user}</strong></div>
+        <div class="detail-rows">
+            <div class="detail-row">
+                <span class="detail-key">Action ID</span>
+                <span class="detail-val">#${log.id}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Details</span>
+                <span class="detail-val">${log.detail}</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-key">Timestamp</span>
+                <span class="detail-val">${d.toISOString()}</span>
+            </div>
+        </div>`;
+    document.getElementById('log-detail-popup').style.display = 'flex';
+}
+
+function closeLogDetail(e) {
+    if (e.target === document.getElementById('log-detail-popup')) {
+        document.getElementById('log-detail-popup').style.display = 'none';
+    }
+}
+
+function confirmPurge() {
+    if (!confirm('Purge all logs older than 30 days? (Demo mode — no actual data will be deleted)')) return;
+    showPopup('Logs purged (demo mode)', 'success');
+}
+
+document.addEventListener('DOMContentLoaded', () => renderLogs(DEMO.logs));
+</script>
+</body>
+</html>

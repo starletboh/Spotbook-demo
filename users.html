@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management — Spotbook</title>
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/users.css">
+    <link rel="stylesheet" href="assets/css/roles.css">
+    <style>
+        .settings-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px;
+            padding: 0;
+            overflow: hidden;
+        }
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+        .page-header > div { flex: 1; }
+        .page-header h1 { margin: 0; font-weight: 300; font-size: clamp(1.4rem,4vw,2rem); }
+        .page-header p  { margin: 6px 0 0; opacity: 0.45; font-size: 0.85rem; }
+        .btn-save {
+            padding: 11px 20px; background: var(--accent-color);
+            border: none; border-radius: 10px; color: #fff;
+            font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(123,44,255,0.35); }
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: #1a0b2e; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; padding: 32px; width: 100%; max-width: 420px;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from{transform:translateY(-16px);opacity:0} to{transform:none;opacity:1} }
+        .container { display: flex; flex-direction: column; gap: 8px; }
+        .register-header { margin-bottom: 10px; }
+        .register-header h2 { margin: 0; font-size: 1.2rem; }
+        .register-header p  { margin: 5px 0 0; opacity: 0.5; font-size: 0.82rem; }
+        label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.7px; color: rgba(255,255,255,0.45); }
+        input, select {
+            width: 100%; background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+            color: #fff; padding: 11px 14px; font-size: 14px; font-family: inherit;
+            outline: none; transition: border-color 0.2s;
+        }
+        input:focus, select:focus { border-color: var(--accent-color); }
+        select option { background: #1a0b2e; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+        .btn-reset {
+            flex: 1; padding: 11px; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+            color: rgba(255,255,255,0.7); cursor: pointer; font-family: inherit; font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="sidebar"></nav>
+
+<main class="content">
+
+<header class="page-header">
+    <div>
+        <h1>User Management</h1>
+        <p>Manage administrative access and roles.</p>
+    </div>
+    <button class="btn-save" onclick="openUserModal()">+ Add New User</button>
+    <button class="btn-save" onclick="openRolesPanel()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);">Manage Roles</button>
+</header>
+
+<section class="settings-card">
+    <div class="table-container">
+        <table class="user-table">
+            <thead>
+                <tr>
+                    <th>User Details</th>
+                    <th>Role</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="user-list"></tbody>
+        </table>
+    </div>
+</section>
+
+</main>
+
+<!-- Add/Edit User Modal -->
+<div id="user-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+        <div class="container" id="user-form">
+            <div class="register-header">
+                <h2 id="modal-title">Register User</h2>
+                <p id="modal-subtitle">Create a new administrative account</p>
+            </div>
+            <label>Full Name</label>
+            <input type="text" id="fullName" placeholder="Full name">
+            <label>Username</label>
+            <input type="text" id="username" placeholder="username123">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="••••••••">
+            <label>Role</label>
+            <select id="role">
+                <option value="" disabled selected>Select a role</option>
+                <option value="admin">Administrator</option>
+                <option value="manager">Venue Manager</option>
+                <option value="staff">Staff</option>
+                <option value="host">Host / Reception</option>
+                <option value="viewer">Viewer</option>
+            </select>
+            <div class="modal-actions">
+                <button class="btn-reset" onclick="closeUserModal()">Cancel</button>
+                <button class="btn-save" onclick="saveUser()" style="flex:1;">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Roles Panel -->
+<div id="roles-overlay" class="roles-overlay">
+    <div class="roles-modal">
+        <div class="roles-header">
+            <div class="roles-title-group">
+                <h2>Role & Permission Management</h2>
+                <p>Configure access levels for each role</p>
+            </div>
+            <button class="roles-close" onclick="closeRolesPanel()">&times;</button>
+        </div>
+        <div class="roles-tabs" id="roles-tabs"></div>
+        <div class="roles-body" id="roles-body"></div>
+        <div class="roles-footer">
+            <button class="btn btn-secondary" onclick="closeRolesPanel()">Cancel</button>
+            <button class="btn btn-primary glow-on-hover" onclick="saveRoles()">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<div id="popup" class="popup"></div>
+
+<script src="assets/js/mock-data.js"></script>
+<script src="assets/js/core.js"></script>
+<script src="assets/js/navigation.js"></script>
+<script>
+let localUsers = JSON.parse(JSON.stringify(DEMO.users));
+let editingUserId = null;
+
+/* ── Render user table ── */
+function renderUsers() {
+    const tbody = document.getElementById('user-list');
+    if (!tbody) return;
+    if (!localUsers.length) {
+        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:24px;opacity:0.4;">No users found.</td></tr>`;
+        return;
+    }
+    const isSelf = uid => uid === DEMO.currentUser.id;
+    tbody.innerHTML = localUsers.map(u => {
+        const roleName = (DEMO.roles[u.role]?.label) || u.role;
+        return `
+        <tr>
+            <td>
+                <div class="user-info">
+                    <span class="user-name">${u.fullName}</span>
+                    <span class="user-handle">@${u.username}</span>
+                </div>
+            </td>
+            <td><span class="role-badge ${u.role}">${roleName}</span></td>
+            <td class="text-right" style="display:flex;justify-content:flex-end;gap:8px;">
+                <button onclick="openEditModal(${u.id})" style="padding:7px 14px;font-size:12px;">Edit</button>
+                ${!isSelf(u.id) ? `<button onclick="deleteUser(${u.id})" style="padding:7px 14px;font-size:12px;background:#c0392b;">Delete</button>` : ''}
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+/* ── Modal helpers ── */
+function openUserModal() {
+    editingUserId = null;
+    document.getElementById('modal-title').textContent    = 'Register User';
+    document.getElementById('modal-subtitle').textContent = 'Create a new administrative account';
+    document.getElementById('fullName').value  = '';
+    document.getElementById('username').value  = '';
+    document.getElementById('password').value  = '';
+    document.getElementById('role').value      = '';
+    document.getElementById('user-modal').style.display = 'flex';
+}
+
+function openEditModal(id) {
+    const user = localUsers.find(u => u.id === id);
+    if (!user) return;
+    editingUserId = id;
+    document.getElementById('modal-title').textContent    = 'Edit User';
+    document.getElementById('modal-subtitle').textContent = 'Update account details';
+    document.getElementById('fullName').value  = user.fullName;
+    document.getElementById('username').value  = user.username;
+    document.getElementById('password').value  = '';
+    document.getElementById('role').value      = user.role;
+    document.getElementById('user-modal').style.display = 'flex';
+}
+
+function closeUserModal() {
+    document.getElementById('user-modal').style.display = 'none';
+}
+
+function saveUser() {
+    const fullName = document.getElementById('fullName').value.trim();
+    const username = document.getElementById('username').value.trim();
+    const role     = document.getElementById('role').value;
+    if (!fullName || !username || !role) {
+        showPopup('Please fill in all required fields.', 'error'); return;
+    }
+    if (editingUserId) {
+        const idx = localUsers.findIndex(u => u.id === editingUserId);
+        if (idx > -1) { localUsers[idx].fullName = fullName; localUsers[idx].username = username; localUsers[idx].role = role; }
+        showPopup('User updated ✓', 'success');
+    } else {
+        localUsers.push({ id: Date.now(), fullName, username, role });
+        showPopup(`User ${username} created ✓`, 'success');
+    }
+    closeUserModal();
+    renderUsers();
+}
+
+function deleteUser(id) {
+    const user = localUsers.find(u => u.id === id);
+    if (!user) return;
+    if (!confirm(`Delete user "${user.fullName}"?`)) return;
+    localUsers = localUsers.filter(u => u.id !== id);
+    renderUsers();
+    showPopup('User deleted.', 'success');
+}
+
+/* ── Roles Panel ── */
+let activeRole = 'admin';
+
+function openRolesPanel() {
+    renderRolesTabs();
+    selectRoleTab(Object.keys(DEMO.roles)[0]);
+    document.getElementById('roles-overlay').classList.add('open');
+}
+
+function closeRolesPanel() {
+    document.getElementById('roles-overlay').classList.remove('open');
+}
+
+function renderRolesTabs() {
+    const tabs = document.getElementById('roles-tabs');
+    tabs.innerHTML = Object.entries(DEMO.roles).map(([key, role]) => `
+        <button class="roles-tab ${key === activeRole ? 'active' : ''}" onclick="selectRoleTab('${key}')">
+            ${role.label}
+        </button>
+    `).join('');
+}
+
+function selectRoleTab(roleKey) {
+    activeRole = roleKey;
+    renderRolesTabs();
+    renderPermissions(roleKey);
+}
+
+function renderPermissions(roleKey) {
+    const role = DEMO.roles[roleKey];
+    const body = document.getElementById('roles-body');
+    if (!body) return;
+
+    if (role.permissions.includes('*')) {
+        body.innerHTML = `<div class="roles-full-access">
+            <div style="font-size:2rem;margin-bottom:10px;">⭐</div>
+            <strong style="color:#a78bff;">Full Access</strong>
+            <p style="margin-top:8px;">This role has unrestricted access to all features and settings.</p>
+        </div>`;
+        return;
+    }
+
+    // Group permissions
+    const groups = {};
+    DEMO.allPermissions.forEach(p => {
+        if (!groups[p.group]) groups[p.group] = [];
+        groups[p.group].push(p);
+    });
+
+    body.innerHTML = Object.entries(groups).map(([group, perms]) => {
+        const granted    = perms.filter(p => role.permissions.includes(p.key));
+        const allGranted = granted.length === perms.length;
+        const anyGranted = granted.length > 0;
+        const badgeClass = allGranted ? 'all' : anyGranted ? 'some' : 'none';
+        const badgeText  = allGranted ? 'Full' : anyGranted ? `${granted.length}/${perms.length}` : 'None';
+
+        return `
+        <div class="perm-group">
+            <div class="perm-group-header" onclick="this.classList.toggle('collapsed');this.nextElementSibling.classList.toggle('collapsed')">
+                <span class="perm-group-chevron">
+                    <svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </span>
+                <span class="perm-group-label">${group}</span>
+                <span class="perm-group-badge ${badgeClass}">${badgeText}</span>
+            </div>
+            <div class="perm-group-children">
+                ${perms.map(p => {
+                    const has = role.permissions.includes(p.key);
+                    return `
+                    <div class="perm-item">
+                        <label class="perm-toggle">
+                            <input type="checkbox" ${has ? 'checked' : ''} onchange="togglePerm('${roleKey}','${p.key}',this.checked)">
+                            <span class="perm-slider"></span>
+                        </label>
+                        <div class="perm-content">
+                            <span class="perm-label">${p.label}</span>
+                            <span class="perm-path">${p.key}</span>
+                        </div>
+                    </div>`;
+                }).join('')}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function togglePerm(roleKey, permKey, enabled) {
+    const role = DEMO.roles[roleKey];
+    if (!role) return;
+    if (enabled) {
+        if (!role.permissions.includes(permKey)) role.permissions.push(permKey);
+    } else {
+        role.permissions = role.permissions.filter(p => p !== permKey);
+    }
+    renderPermissions(roleKey);
+}
+
+function saveRoles() {
+    closeRolesPanel();
+    showPopup('Role permissions saved ✓', 'success');
+}
+
+document.addEventListener('DOMContentLoaded', renderUsers);
+</script>
+</body>
+</html>

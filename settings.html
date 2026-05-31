@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings — Spotbook</title>
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/settings.css">
+    <style>
+        h1 { margin:0;font-weight:300;font-size:clamp(1.4rem,4vw,2rem); }
+        .page-header { display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:28px; }
+        .setting-label { font-size:14px;font-weight:500;color:#eee; }
+        .setting-row { display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.05); }
+        .setting-row:last-child { border-bottom:none; }
+        input[type="text"], input[type="number"], input[type="time"], select {
+            background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+            color:#fff;padding:8px 12px;border-radius:8px;font-family:inherit;outline:none;
+            transition:border-color 0.2s; min-width:120px;
+        }
+        input:focus, select:focus { border-color:var(--accent-color); }
+        select option { background:#1a0b2e; }
+        .switch { position:relative;width:44px;height:22px;flex-shrink:0; }
+        .switch input { opacity:0;width:0;height:0; }
+        .slider {
+            position:absolute;inset:0;background:rgba(255,255,255,0.1);
+            border:1px solid rgba(255,255,255,0.1);border-radius:999px;cursor:pointer;transition:0.25s;
+        }
+        .slider:before {
+            content:"";position:absolute;height:16px;width:16px;left:3px;top:50%;
+            transform:translateY(-50%);background:#aaa;border-radius:50%;transition:0.25s;
+        }
+        .switch input:checked + .slider { background:var(--accent-color);border-color:var(--accent-color); }
+        .switch input:checked + .slider:before { transform:translate(22px,-50%);background:#fff; }
+        .save-bar {
+            position:fixed;bottom:0;left:70px;right:0;padding:16px 40px;
+            background:rgba(5,1,10,0.9);backdrop-filter:blur(10px);
+            border-top:1px solid rgba(255,255,255,0.07);
+            display:flex;align-items:center;justify-content:space-between;gap:16px;
+        }
+        @media(max-width:768px){.save-bar{left:0;bottom:65px;padding:12px 16px;}}
+        .save-bar span { opacity:0.5;font-size:13px; }
+        .btn-save-settings {
+            padding:11px 28px;background:var(--accent-color);border:none;
+            border-radius:10px;color:#fff;font-size:14px;font-weight:600;
+            cursor:pointer;font-family:inherit;transition:transform 0.2s,box-shadow 0.2s;
+        }
+        .btn-save-settings:hover { transform:translateY(-2px);box-shadow:0 8px 20px rgba(123,44,255,0.35); }
+        .hint { font-size:0.78rem;opacity:0.45;margin-top:4px; }
+        .danger-zone { border-color:rgba(231,76,60,0.25)!important; }
+        .danger-zone h3 { color:#e74c3c!important; }
+        .btn-danger {
+            padding:9px 18px;background:rgba(231,76,60,0.15);
+            border:1px solid rgba(231,76,60,0.3);border-radius:8px;
+            color:#e74c3c;font-size:13px;cursor:pointer;font-family:inherit;
+            transition:background 0.2s;
+        }
+        .btn-danger:hover { background:rgba(231,76,60,0.25); }
+    </style>
+</head>
+<body>
+
+<nav class="sidebar"></nav>
+
+<main class="content">
+    <div class="settings-container">
+        <div class="page-header">
+            <h1>Settings</h1>
+        </div>
+
+        <div class="settings-grid">
+
+            <!-- System -->
+            <div class="settings-card">
+                <h3>System</h3>
+                <div class="setting-row">
+                    <div><div class="setting-label">Currency</div><div class="hint">Used in pricing displays</div></div>
+                    <select id="s-currency">
+                        <option value="EUR" selected>EUR (€)</option>
+                        <option value="USD">USD ($)</option>
+                        <option value="GBP">GBP (£)</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <div><div class="setting-label">Timezone</div></div>
+                    <select id="s-timezone">
+                        <option value="Europe/Athens" selected>Europe/Athens</option>
+                        <option value="Europe/London">Europe/London</option>
+                        <option value="America/New_York">America/New_York</option>
+                    </select>
+                </div>
+                <div class="setting-row">
+                    <div><div class="setting-label">Language</div></div>
+                    <select id="s-language">
+                        <option value="en" selected>English</option>
+                        <option value="el-gr">Greek</option>
+                        <option value="de">German</option>
+                        <option value="fr">French</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Grid -->
+            <div class="settings-card">
+                <h3>Floor Plan Grid</h3>
+                <div class="setting-row">
+                    <div><div class="setting-label">Grid Columns</div><div class="hint">Number of columns in spot grid</div></div>
+                    <input type="number" id="s-columns" value="8" min="4" max="16">
+                </div>
+                <div class="setting-row">
+                    <div><div class="setting-label">Default Start Time</div></div>
+                    <input type="time" id="s-start" value="10:00">
+                </div>
+                <div class="setting-row">
+                    <div><div class="setting-label">Default End Time</div></div>
+                    <input type="time" id="s-end" value="19:00">
+                </div>
+            </div>
+
+            <!-- Reservations -->
+            <div class="settings-card">
+                <h3>Reservations</h3>
+                <div class="setting-row">
+                    <div><div class="setting-label">Show Price in Modal</div><div class="hint">Display spot price when booking</div></div>
+                    <label class="switch"><input type="checkbox" id="s-showprice" checked><span class="slider"></span></label>
+                </div>
+                <div class="setting-row">
+                    <div><div class="setting-label">Show Row in Modal</div><div class="hint">Display row number in booking</div></div>
+                    <label class="switch"><input type="checkbox" id="s-showrow" checked><span class="slider"></span></label>
+                </div>
+            </div>
+
+            <!-- Notifications -->
+            <div class="settings-card">
+                <h3>Notifications</h3>
+                <div class="setting-row">
+                    <div><div class="setting-label">Push Notifications</div><div class="hint">Browser push alerts for events</div></div>
+                    <label class="switch"><input type="checkbox" id="s-notif" checked><span class="slider"></span></label>
+                </div>
+                <div class="setting-row">
+                    <div><div class="setting-label">Check-In Alerts</div><div class="hint">Alert when guest arrives</div></div>
+                    <label class="switch"><input type="checkbox" id="s-checkin-notif" checked><span class="slider"></span></label>
+                </div>
+            </div>
+
+            <!-- Organisation -->
+            <div class="settings-card">
+                <h3>Organization</h3>
+                <div class="setting-row">
+                    <div><div class="setting-label">Venue Name</div></div>
+                    <input type="text" id="s-venue" value="Velvet Shore Beach Club">
+                </div>
+            </div>
+
+            <!-- Danger zone -->
+            <div class="settings-card danger-zone">
+                <h3>Danger Zone</h3>
+                <div class="setting-row">
+                    <div>
+                        <div class="setting-label" style="color:#e74c3c;">Factory Reset</div>
+                        <div class="hint">Restore all settings to defaults</div>
+                    </div>
+                    <button class="btn-danger" onclick="confirmReset()">Reset Settings</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<div class="save-bar">
+    <span>Changes are applied to this demo session only.</span>
+    <button class="btn-save-settings" onclick="saveSettings()">Save Settings</button>
+</div>
+
+<div id="popup" class="popup"></div>
+
+<script src="assets/js/mock-data.js"></script>
+<script src="assets/js/core.js"></script>
+<script src="assets/js/navigation.js"></script>
+<script>
+function saveSettings() {
+    // Update DEMO.settings from inputs
+    DEMO.settings['system.currency']           = document.getElementById('s-currency').value;
+    DEMO.settings['system.timezone']           = document.getElementById('s-timezone').value;
+    DEMO.settings['system.language']           = document.getElementById('s-language').value;
+    DEMO.settings['grid.columns']              = parseInt(document.getElementById('s-columns').value, 10);
+    DEMO.settings['grid.default_start_time']   = document.getElementById('s-start').value;
+    DEMO.settings['grid.default_end_time']     = document.getElementById('s-end').value;
+    DEMO.settings['reservation.show_price_in_modal'] = document.getElementById('s-showprice').checked;
+    DEMO.settings['reservation.show_row_in_modal']   = document.getElementById('s-showrow').checked;
+    DEMO.settings['notifications.enabled']    = document.getElementById('s-notif').checked;
+    DEMO.settings['notifications.checkin_alert'] = document.getElementById('s-checkin-notif').checked;
+    showPopup('Settings saved ✓', 'success');
+}
+
+function confirmReset() {
+    if (!confirm('Reset all settings to defaults? (Demo mode only)')) return;
+    showPopup('Settings reset to defaults.', 'success');
+}
+</script>
+</body>
+</html>

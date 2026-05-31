@@ -1,0 +1,193 @@
+/* ==========================================================================
+   HEADER SECTION & CONTROLS
+   ========================================================================== */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.header-main {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+h1 { 
+    
+    margin: 0; 
+    font-weight: 300; 
+    font-size: 2rem; 
+}
+
+/* Updated Container for both Date pickers and Row Select dropdown */
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Combined Picker Wrapper style matching your old .date-picker-group snippet */
+.date-picker-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Style for inputs inside the date group */
+.date-picker-group input[type="date"] {
+    background: transparent;
+    border: none;
+    color: white;
+    outline: none;
+    font-family: inherit;
+    cursor: pointer;
+    max-width: 140px;
+}
+
+/* Fallback/Stand-alone filter dropdown styling matching your theme palette */
+#row-filter {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    padding: 8px 14px;
+    border-radius: 12px;
+    outline: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+#row-filter option {
+    background: #1a0b2e; /* Matches your background colors schema */
+    color: white;
+}
+
+#row-filter:focus, .date-picker-group:focus-within {
+    /* border-color: #7b2cff;*/
+    border-color: var(--accent-color); 
+}
+
+/* ==========================================================================
+   STAT CARDS (KPI)
+   ========================================================================== */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-card .value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 10px 0 0 0;
+    /* color: #7b2cff; */
+    color: var(--accent-color);
+}
+
+.trend-label {
+    font-size: 0.8rem;
+    opacity: 0.6;
+    display: block;
+    margin-top: 5px;
+}
+
+/* ==========================================================================
+   ANALYTICS GRIDS & GRAPH CONTAINERS
+   ========================================================================== */
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.chart-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-box h3 {
+    margin: 0 0 10px 0;
+    font-weight: 400;
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* CRITICAL LAYER: Wrapper provides layout protection limits against memory loop spikes */
+.chart-wrapper {
+    position: relative; 
+    height: 300px;      
+    width: 100%;        
+    max-height: 400px;  
+}
+
+/* ==========================================================================
+   GRID & LEGEND LAYOUTS
+   ========================================================================== */
+.grid {
+    display: grid;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.sunbed {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    text-align: center;
+    border-radius: 8px;
+    font-size: 0.8rem;
+}
+
+.sunbed .label { font-weight: bold; font-size: 1rem; }
+.status-text { text-transform: uppercase; font-size: 0.6rem; opacity: 0.6; margin-top: 4px; }
+
+.legend { margin-top: 10px; font-size: 0.9rem; }
+.dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+.dot.free { background: #2ecc71; }
+.dot.reserved { background: #e74c3c; }
+
+/* ==========================================================================
+   RESPONSIVE LAYOUT RESPONSES (MOBILE TWEAKS)
+   ========================================================================== */
+@media (max-width: 768px) {
+    .header-main {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .header-controls {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        gap: 10px;
+    }
+
+    .date-picker-group, #row-filter {
+        width: 100%;
+        box-sizing: border-box;
+        justify-content: space-between;
+    }
+
+    /* .analytics-grid {
+        grid-template-columns: 1fr; 
+    } */
+}

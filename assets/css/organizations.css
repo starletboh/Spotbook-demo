@@ -1,0 +1,186 @@
+/* =========================================================
+   ORGANIZATIONS PAGE
+   ========================================================= */
+
+/* Page layout */
+.content {
+    padding: 20px;
+}
+
+/* Header */
+header {
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+}
+
+header p {
+    opacity: 0.7;
+    font-size: 0.9rem;
+}
+
+/* Card sections */
+.card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+}
+
+.card h2 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+/* Form Layout Architecture */
+#org-form {
+    display: block; /* Avoid flex clashing with sub-panes */
+    width: 100%;
+    max-width: 500px; /* Restrict ultra-wide form stretching */
+}
+
+#org-form label {
+    display: block;
+    font-size: 0.85rem;
+    opacity: 0.8;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+#org-form input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.2);
+    color: #fff;
+    outline: none;
+    margin-bottom: 15px; /* Spacing out form rows */
+}
+
+#org-form input:focus {
+    border-color: #3498db;
+}
+
+/* Step Control Architecture Containers */
+.form-step-pane {
+    display: none; /* Hide panels by default */
+    flex-direction: column;
+    width: 100%;
+}
+
+.form-step-pane.active {
+    display: flex; /* Only render when active flag state is appended */
+    animation: fadeInStep 0.25s ease-in-out forwards;
+}
+
+/* Buttons */
+button {
+    cursor: pointer;
+}
+
+.glow-on-hover {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #3498db, #9b59b6);
+    color: #fff;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.glow-on-hover:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+}
+
+/* Secondary/Back utility button styling */
+.btn-secondary {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Tables (Bound to .user-table) */
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.user-table thead th {
+    text-align: left;
+    font-size: 0.85rem;
+    opacity: 0.7;
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-table tbody td {
+    padding: 12px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Row hover */
+.user-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* Delete button */
+.user-table button {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ff6b6b;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: 0.2s ease;
+}
+
+.user-table button:hover {
+    background: rgba(255, 0, 0, 0.1);
+    border-color: #ff6b6b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .user-table thead {
+        display: none;
+    }
+
+    .user-table tbody td {
+        display: block;
+        padding: 8px 0;
+    }
+
+    .user-table tbody tr {
+        margin-bottom: 15px;
+        display: block;
+    }
+}
+
+/* Fluid entry animation for switching panels */
+@keyframes fadeInStep {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics — Spotbook</title>
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="stylesheet" href="assets/css/analytics.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<nav class="sidebar"></nav>
+
+<main class="content">
+    <header>
+        <div class="header-main">
+            <h1>Analytics Dashboard</h1>
+            <div class="header-controls">
+                <div class="date-picker-group">
+                    <input type="date" id="date-start">
+                    <span style="color:rgba(255,255,255,0.3)">to</span>
+                    <input type="date" id="date-end">
+                </div>
+                <select id="row-filter">
+                    <option value="all">All Rows</option>
+                    <option value="1">Row 1</option>
+                    <option value="2">Row 2</option>
+                    <option value="3">Row 3</option>
+                </select>
+                <button id="export-csv-btn" class="glow-on-hover" onclick="demoExport()">Export Data</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="stats-container">
+        <div class="stat-card">
+            <span class="trend-label">Total Revenue</span>
+            <div id="stat-revenue" class="value">€0.00</div>
+            <span class="trend-label">Based on dynamic pricing.</span>
+        </div>
+        <div class="stat-card">
+            <span class="trend-label">Occupancy Rate</span>
+            <div id="stat-occupancy" class="value">0%</div>
+            <span class="trend-label">Bed allocation density.</span>
+        </div>
+        <div class="stat-card">
+            <span class="trend-label">Total Bookings</span>
+            <div id="stat-bookings" class="value">0</div>
+            <span class="trend-label">Active reservations in window.</span>
+        </div>
+        <div class="stat-card">
+            <span class="trend-label">RevPAB</span>
+            <div id="stat-revpab" class="value">€0.00</div>
+            <span class="trend-label">Revenue per available bed</span>
+        </div>
+        <div class="stat-card">
+            <span class="trend-label">Avg Booking Window</span>
+            <div id="stat-leadtime" class="value">0 Days</div>
+            <span class="trend-label">Days booked in advance.</span>
+        </div>
+        <div class="stat-card">
+            <span class="trend-label">Arrival Rate</span>
+            <div id="stat-arrival" class="value">0%</div>
+        </div>
+        <div class="stat-card">
+            <span class="trend-label">Cancellation Rate</span>
+            <div id="stat-cancel" class="value">0%</div>
+        </div>
+    </div>
+
+    <div class="analytics-grid">
+        <div class="chart-box">
+            <h3>Revenue per Row</h3>
+            <div class="chart-wrapper"><canvas id="revenueRowChart"></canvas></div>
+        </div>
+        <div class="chart-box">
+            <h3>Occupancy Rate</h3>
+            <div class="chart-wrapper"><canvas id="occupancyChart"></canvas></div>
+        </div>
+        <div class="chart-box">
+            <h3>Cancellations</h3>
+            <div class="chart-wrapper"><canvas id="cancelChart"></canvas></div>
+        </div>
+        <div class="chart-box">
+            <h3>Peak Booking Hours</h3>
+            <div class="chart-wrapper"><canvas id="peakHoursChart"></canvas></div>
+        </div>
+    </div>
+</main>
+
+<div id="popup" class="popup"></div>
+
+<script src="assets/js/mock-data.js"></script>
+<script src="assets/js/core.js"></script>
+<script src="assets/js/navigation.js"></script>
+<script>
+let charts = {};
+
+function initDates() {
+    const end   = DEMO.today;
+    const start = new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0];
+    document.getElementById('date-start').value = start;
+    document.getElementById('date-end').value   = end;
+}
+
+function updateKPIs(s) {
+    document.getElementById('stat-revenue').textContent  = `€${s.revenue}`;
+    document.getElementById('stat-occupancy').textContent= `${s.occupancy}%`;
+    document.getElementById('stat-bookings').textContent = s.totalBookings;
+    document.getElementById('stat-revpab').textContent   = `€${s.revpab}`;
+    document.getElementById('stat-leadtime').textContent = s.leadTime;
+    document.getElementById('stat-arrival').textContent  = `${s.arrivalRate}%`;
+    document.getElementById('stat-cancel').textContent   = `${s.cancelRate}%`;
+}
+
+const CHART_DEFAULTS = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: 'rgba(255,255,255,0.6)', font: { size: 11 } } } },
+    scales: {
+        x: { ticks: { color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+        y: { ticks: { color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+    }
+};
+
+function renderCharts(rowStats, hourly) {
+    const labels   = rowStats.map(r => r.label);
+    const revenues = rowStats.map(r => r.revenue);
+    const occupancies = rowStats.map(r => r.occupancy);
+
+    destroyChart('revenueRowChart');
+    charts.revenueRowChart = new Chart(document.getElementById('revenueRowChart'), {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{ label: 'Revenue (€)', data: revenues,
+                backgroundColor: 'rgba(123,44,255,0.6)', borderColor: '#7b2cff', borderWidth: 1 }]
+        },
+        options: CHART_DEFAULTS
+    });
+
+    destroyChart('occupancyChart');
+    charts.occupancyChart = new Chart(document.getElementById('occupancyChart'), {
+        type: 'doughnut',
+        data: {
+            labels,
+            datasets: [{ data: occupancies,
+                backgroundColor: ['rgba(123,44,255,0.7)','rgba(52,152,219,0.7)','rgba(46,204,113,0.7)'],
+                borderWidth: 2, borderColor: '#1a0b2e' }]
+        },
+        options: { ...CHART_DEFAULTS, scales: undefined }
+    });
+
+    destroyChart('cancelChart');
+    charts.cancelChart = new Chart(document.getElementById('cancelChart'), {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [
+                { label: 'Total', data: rowStats.map(r => r.bookings), backgroundColor: 'rgba(123,44,255,0.4)' },
+                { label: 'Cancelled', data: rowStats.map(r => Math.round(r.bookings * 0.06)), backgroundColor: 'rgba(231,76,60,0.6)' }
+            ]
+        },
+        options: CHART_DEFAULTS
+    });
+
+    destroyChart('peakHoursChart');
+    charts.peakHoursChart = new Chart(document.getElementById('peakHoursChart'), {
+        type: 'line',
+        data: {
+            labels: hourly.map(h => `${h.hour}:00`),
+            datasets: [{ label: 'Bookings', data: hourly.map(h => h.count),
+                borderColor: '#7b2cff', backgroundColor: 'rgba(123,44,255,0.15)',
+                fill: true, tension: 0.4, pointRadius: 3 }]
+        },
+        options: CHART_DEFAULTS
+    });
+}
+
+function destroyChart(id) {
+    if (charts[id]) { charts[id].destroy(); delete charts[id]; }
+}
+
+function applyRowFilter() {
+    const val = document.getElementById('row-filter')?.value || 'all';
+    const filtered = val === 'all'
+        ? DEMO.analytics.rowStats
+        : DEMO.analytics.rowStats.filter(r => String(r.row) === val);
+    renderCharts(filtered, DEMO.analytics.hourlyDistribution);
+}
+
+function demoExport() {
+    // Generate a demo CSV download
+    const rows = ['Row,Bookings,Revenue,Occupancy%'];
+    DEMO.analytics.rowStats.forEach(r => {
+        rows.push(`${r.label},${r.bookings},${r.revenue},${r.occupancy}`);
+    });
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    const a    = document.createElement('a');
+    a.href     = URL.createObjectURL(blob);
+    a.download = 'spotbook-analytics-export.csv';
+    a.click();
+    showPopup('CSV exported ✓', 'success');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initDates();
+    updateKPIs(DEMO.analytics.summary);
+    renderCharts(DEMO.analytics.rowStats, DEMO.analytics.hourlyDistribution);
+    document.getElementById('row-filter')?.addEventListener('change', applyRowFilter);
+    document.getElementById('date-start')?.addEventListener('change', () => updateKPIs(DEMO.analytics.summary));
+    document.getElementById('date-end')?.addEventListener('change',   () => updateKPIs(DEMO.analytics.summary));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "name": "Spotbook",
+  "short_name": "Spotbook",
+  "description": "Venue Operations Platform",
+  "start_url": "./dashboard.html",
+  "display": "standalone",
+  "background_color": "#05010a",
+  "theme_color": "#7b2cff",
+  "icons": []
+}

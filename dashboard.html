@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Management Dashboard — Spotbook</title>
+    <link rel="stylesheet" href="assets/css/common.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+</head>
+<body>
+
+<nav class="sidebar"></nav>
+
+<main class="content">
+
+<header>
+    <div class="header-main">
+        <div>
+            <p class="par">
+                Organization: <strong style="color:var(--accent-color);opacity:1;" id="org-msg"></strong>
+            </p>
+            <h1 id="welcome-msg">Welcome back</h1>
+            <p id="current-date-display" class="par"></p>
+        </div>
+        <div class="header-controls">
+            <label for="stats-date" style="font-size:0.8rem;opacity:0.7;">View Stats For:</label>
+            <input type="date" id="stats-date" onchange="loadSummary()">
+            <button class="btn-bell" onclick="showPopup('Notifications enabled ✓', 'success')" title="Enable Notifications">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 1 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+</header>
+
+<div class="stats-container">
+    <div class="stat-card">
+        <h3>Today's Bookings</h3>
+        <p class="value" id="count-booked">--</p>
+    </div>
+    <div class="stat-card">
+        <h3>Available</h3>
+        <p class="value" id="count-free">--</p>
+    </div>
+    <div class="stat-card">
+        <h3>Revenue (Est)</h3>
+        <p class="value" id="revenue">€0.00</p>
+    </div>
+</div>
+
+<div class="reservations-section">
+    <h3 class="section-title">Today's Reservations</h3>
+    <div class="reservations-table-wrapper">
+        <table class="reservations-table">
+            <thead>
+                <tr>
+                    <th>Spot</th>
+                    <th>Customer</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="reservations-tbody">
+                <tr><td colspan="5" class="empty-row">Loading…</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</main>
+
+<div id="popup" class="popup"></div>
+
+<script src="assets/js/mock-data.js"></script>
+<script src="assets/js/core.js"></script>
+<script src="assets/js/navigation.js"></script>
+<script>
+const dateInput   = document.getElementById('stats-date');
+const dateDisplay = document.getElementById('current-date-display');
+
+if (dateInput) dateInput.value = DEMO.today;
+
+function applyUserProfile() {
+    const user = DEMO.currentUser;
+    const welcomeEl = document.getElementById('welcome-msg');
+    const orgEl     = document.getElementById('org-msg');
+    if (welcomeEl) welcomeEl.textContent = `Welcome back, ${user.fullName}`;
+    if (orgEl)     orgEl.textContent     = user.organizationId;
+}
+
+function loadSummary() {
+    const selectedDate = dateInput ? dateInput.value : DEMO.today;
+    const d = new Date(selectedDate + 'T00:00:00');
+    if (dateDisplay) {
+        dateDisplay.textContent = d.toLocaleDateString('en', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
+    }
+
+    const s = DEMO.summary;
+    document.getElementById('count-booked').textContent = s.booked;
+    document.getElementById('count-free').textContent   = s.free;
+    document.getElementById('revenue').textContent      = `€${s.revenue.toFixed(2)}`;
+
+    const reservations = [];
+    DEMO.grid.forEach(spot => {
+        const bookings = Array.isArray(spot.bookingDetails) ? spot.bookingDetails : [];
+        bookings.forEach(b => {
+            reservations.push({
+                spotData:     spot,
+                label:        spot.label,
+                customerName: b.customerName || 'N/A',
+                startTime:    b.startTime || '??',
+                endTime:      b.endTime   || '??',
+                status:       b.status    || 'reserved'
+            });
+        });
+    });
+
+    renderReservationsTable(reservations);
+}
+
+function renderReservationsTable(reservations) {
+    const tbody = document.getElementById('reservations-tbody');
+    if (!tbody) return;
+
+    if (!reservations.length) {
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-row">No reservations for this date.</td></tr>`;
+        return;
+    }
+
+    reservations.sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+    tbody.innerHTML = reservations.map((r, index) => `
+        <tr>
+            <td><strong>${r.label}</strong></td>
+            <td>${r.customerName}</td>
+            <td class="time-cell">${r.startTime} – ${r.endTime}</td>
+            <td><span class="status-badge ${r.status}">${r.status.charAt(0).toUpperCase()+r.status.slice(1)}</span></td>
+            <td>
+                <button onclick="viewSpot(${index})">View</button>
+            </td>
+        </tr>
+    `).join('');
+
+    window._dashReservations = reservations;
+}
+
+function viewSpot(index) {
+    window.location.href = 'floorplan.html';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    applyUserProfile();
+    loadSummary();
+    if (dateInput) dateInput.addEventListener('change', loadSummary);
+});
+</script>
+</body>
+</html>

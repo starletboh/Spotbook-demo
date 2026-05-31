@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Spotbook — Sign In</title>
+    <link rel="stylesheet" href="assets/css/common.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', sans-serif;
+            background: radial-gradient(circle at top, #1a0b2e, #05010a);
+        }
+        .login-wrap {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+        .logo-block {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .logo-block img {
+            width: 54px;
+            height: 54px;
+            filter: invert(1);
+            margin-bottom: 16px;
+        }
+        .logo-block h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a78bff, #7b2cff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+        .logo-block p {
+            color: rgba(255,255,255,0.4);
+            font-size: 0.85rem;
+            margin-top: 6px;
+        }
+        .card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 20px;
+            padding: 36px 32px;
+            backdrop-filter: blur(12px);
+        }
+        .card h2 {
+            font-size: 1.15rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+        .card p.sub {
+            color: rgba(255,255,255,0.38);
+            font-size: 0.82rem;
+            margin-bottom: 28px;
+        }
+        label {
+            display: block;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: rgba(255,255,255,0.45);
+            margin-bottom: 7px;
+        }
+        input {
+            width: 100%;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #fff;
+            padding: 12px 14px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            margin-bottom: 18px;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        input:focus {
+            border-color: #7b2cff;
+            background: rgba(123,44,255,0.08);
+        }
+        .demo-hint {
+            background: rgba(123,44,255,0.12);
+            border: 1px solid rgba(123,44,255,0.3);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 22px;
+            font-size: 12.5px;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.55;
+        }
+        .demo-hint strong { color: #a78bff; }
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(90deg, #1a0b2e, #7b2cff);
+            background-size: 200% auto;
+            border: 1px solid rgba(123,44,255,0.4);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background-position 0.4s, transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:hover {
+            background-position: right center;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(123,44,255,0.35);
+        }
+        .footer-note {
+            text-align: center;
+            margin-top: 28px;
+            color: rgba(255,255,255,0.2);
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-wrap">
+        <div class="logo-block">
+            <img src="assets/icons/home.png" alt="Spotbook">
+            <h1>Spotbook</h1>
+            <p>Venue Operations Platform</p>
+        </div>
+        <div class="card">
+            <h2>Sign in to your workspace</h2>
+            <p class="sub">Velvet Shore Beach Club</p>
+
+            <div class="demo-hint">
+                🎯 <strong>Demo Mode</strong> — Click <em>Sign In</em> to explore the platform as <strong>Alexandra Papadopoulos (Admin)</strong>. No credentials required.
+            </div>
+
+            <label>Username</label>
+            <input type="text" value="alexandra.p" id="username">
+
+            <label>Password</label>
+            <input type="password" value="••••••••" id="password">
+
+            <button class="btn-primary" onclick="doLogin()">Sign In</button>
+        </div>
+        <p class="footer-note">Spotbook · Internal Operations Platform · Demo Build</p>
+    </div>
+
+    <div id="popup" class="popup"></div>
+
+    <script>
+        function doLogin() {
+            const btn = document.querySelector('.btn-primary');
+            btn.textContent = 'Signing in…';
+            btn.style.opacity = '0.7';
+            setTimeout(() => { window.location.href = 'dashboard.html'; }, 700);
+        }
+        document.querySelector('input[type="password"]').addEventListener('keydown', e => {
+            if (e.key === 'Enter') doLogin();
+        });
+
+        // popup helper
+        function showPopup(msg, type) {
+            let p = document.getElementById('popup');
+            p.textContent = msg;
+            p.className = `popup ${type} show`;
+            setTimeout(() => { p.className = `popup ${type}`; }, 2800);
+        }
+    </script>
+</body>
+</html>
