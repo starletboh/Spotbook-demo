@@ -1,1 +1,0 @@
-# Spotbook-demo
