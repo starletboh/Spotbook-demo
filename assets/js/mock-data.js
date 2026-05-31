@@ -8,7 +8,7 @@ window.DEMO = window.DEMO || {};
 // ── Current logged-in user ──────────────────────────────────────────────────
 DEMO.currentUser = {
     id: 1,
-    fullName: 'Alexandra Papadopoulos',
+    fullName: 'Alexandra Papadopoulou',
     username: 'alexandra.p',
     role: 'admin',
     organizationId: 'Velvet Shore Beach Club'
