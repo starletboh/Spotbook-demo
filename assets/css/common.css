@@ -2,13 +2,41 @@
     --primary-color: #1a0b2e;
     --bg-color: #05010a;
     --accent-color: #7b2cff;
+    --demo-banner-height: 44px;
 }
 
 body {
-    padding-top: 44px;
-    background: radial-gradient(circle at top, var(--primary-color), var(--bg-color));
-}
+    margin: 0;
+    display: flex;
+    min-height: 100vh;
+    font-family: 'Segoe UI', sans-serif;
+    color: white;
 
+    padding-top: var(--demo-banner-height);
+}
+.demo-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    z-index: 2000;
+
+    padding: 10px 12px;
+    text-align: center;
+
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+
+    color: #fff;
+
+    background: linear-gradient(90deg, #ff4d4d, #ff7a59);
+
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+
+    backdrop-filter: blur(8px);
+}
 /* --- POPUP TOAST --- */
 .popup {
     position: fixed;
