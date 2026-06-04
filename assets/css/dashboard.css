@@ -5,7 +5,25 @@ header {
     align-items: center;
     margin-bottom: 30px;
 }
+.demo-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
 
+    background: #ff4d4d;
+    color: white;
+
+    text-align: center;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+
+    padding: 10px 12px;
+
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
 .header-main {
     width: 100%;
     display: flex;
