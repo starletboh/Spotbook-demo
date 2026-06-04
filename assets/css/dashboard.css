@@ -7,26 +7,26 @@ header {
     margin-bottom: 30px;
 }
 .demo-banner {
-    position: fixed;
+    position: sticky;
     top: 0;
-    left: 0;
-    right: 0;
     z-index: 9999;
-
     background: linear-gradient(90deg, #ff4d4d, #ff7a59);
     color: white;
-
     font-weight: 600;
     font-size: 12px;
     letter-spacing: 0.4px;
-
     text-align: center;
+    padding: 10px 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
 
-    padding: 10px 14px;
-
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-
-    backdrop-filter: blur(8px);
+.demo-banner-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
 }
 .header-main {
     width: 100%;
