@@ -31,7 +31,7 @@ DEMO.gridColumns = 8;
 DEMO.grid = [];
 
 const statuses = ['free', 'reserved', 'arrived', 'free', 'free', 'reserved', 'free', 'arrived'];
-const colors   = ['#7b2cff','#e74c3c','#2ecc71','#7b2cff','#7b2cff','#e74c3c','#7b2cff','#2ecc71'];
+const colors   = ['#2ECC71','#e74c3c','#F1C40F','#7b2cff','#7b2cff','#e74c3c','#2ECC71','#F1C40F'];
 
 const reservationPool = [
     { customerName: 'Maria Konstantinou',  customerPhone: '+30 697 111 2233', startTime: '10:00', endTime: '18:00', notes: 'Prefers window / front-row seating. Allergic to shellfish.', status: 'reserved', checkedIn: false },
